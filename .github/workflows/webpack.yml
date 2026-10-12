@@ -1,4 +1,4 @@
-name: NodeJS with Webpack
+name: CarsonBench tests and Vite build
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [22.x, 24.x]
 
     steps:
     - uses: actions/checkout@v4
@@ -22,7 +22,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    - name: Test and build
       run: |
-        npm install
-        npx webpack
+        npm ci
+        npm test
+        npm run build
