@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { ArrowUpRight, Check, KeyRound, LoaderCircle, LockKeyhole, Network, Play, RotateCcw, Square, Download, X } from 'lucide-react';
+import { ArrowUpRight, Check, KeyRound, LoaderCircle, LockKeyhole, Network, Play, RotateCcw, Square, Download, Upload, X } from 'lucide-react';
 import { PARAMETERS, PROMPT_VERSION, SYSTEM_PROMPT, responseText } from '../protocol.js';
 import data from '../data/experiment.json' with { type: 'json' };
 import { fmt, roundScore } from '../experiment.js';
 import { apiRequest } from '../api.js';
 import { ReadingPack } from './BookContent.jsx';
 
-export function ConnectionPanel({ record, setRecord, apiKey, setApiKey, busy, onStart, onNew, onDownload }) {
+export function ConnectionPanel({ record, setRecord, apiKey, setApiKey, busy, onStart, onNew, onDownload, onImport }) {
   const [models, setModels] = useState([{ id: 'deepseek-flash', name: 'DeepSeek Flash' }, { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro' }]);
   const [connection, setConnection] = useState('');
   const [checking, setChecking] = useState(false);
@@ -31,7 +31,7 @@ export function ConnectionPanel({ record, setRecord, apiKey, setApiKey, busy, on
       if (!result.models.some(m=>m.id === (record.meta.model || 'deepseek-flash'))) {
         setConnection('该账户未返回所选模型，请从更新后的列表选择模型。'); return;
       }
-      setConnection('连接成功 · 固定阅读包已就绪'); onStart();
+      setConnection('连接成功 · 固定阅读包已就绪'); await onStart();
     } catch (error) { setConnection(error.name === 'TimeoutError' ? '连接超时，请稍后重试。' : error.name === 'TypeError' ? '连接失败，请检查网络与本地 API 服务。' : error.message); }
     finally { setChecking(false); }
   }
@@ -45,6 +45,7 @@ export function ConnectionPanel({ record, setRecord, apiKey, setApiKey, busy, on
     <ReadingPack record={record}/>
     <div className="live-setup-footer"><span><LockKeyhole size={14}/> {locked ? '同一模型、同一文本、同一提示词贯穿三轮' : 'API 验证成功后锁定材料与模型，进入独立作答'}</span>{locked ? <button className="text-link" disabled={busy || checking} onClick={onNew}><Download size={14}/> 导出并开始新实验</button> : <button className="button primary" disabled={!ready || busy || checking} onClick={start}>{checking ? <LoaderCircle className="spin" size={16}/> : <ArrowUpRight size={16}/>} {checking ? '验证并准备实验…' : '开始真实实验'}</button>}</div>
     <details className="request-settings"><summary>固定调用参数与提示词版本</summary><p>{PROMPT_VERSION} · temperature = {PARAMETERS.temperature} · max_tokens = {PARAMETERS.max_tokens} · 思考模式关闭。每轮初始请求不包含其他轮的回答；追问单独记录，不计入首答评分。</p></details>
+    <label className={`record-import text-link ${busy || checking ? 'disabled' : ''}`}><Upload size={14}/> 导入实验 JSON，继续已有实验<input type="file" accept="application/json,.json" aria-label="导入实验记录" disabled={busy || checking} hidden onChange={async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;setChecking(true);try{await onImport(file);}finally{setChecking(false);}}}/></label>
     {record.mode === 'demo' && <div className="legacy-actions"><button className="text-link legacy-download" onClick={onDownload}>下载旧演示记录 <Download size={13}/></button><button className="text-link legacy-download" disabled={busy || checking} onClick={onNew}>导出旧记录并进入真实实验 <ArrowUpRight size={13}/></button></div>}
   </div>;
 }

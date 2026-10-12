@@ -7,3 +7,7 @@ dist/
 .env.*
 !.env.example
 CarsonBench-*.json
+release/
+.desktop-test-profile/
+.desktop-smoke-result.json
+.desktop-smoke-preview.png

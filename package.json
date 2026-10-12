@@ -1,13 +1,16 @@
 {
   "name": "carsonbench",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test"
+    "test": "node --test",
+    "desktop": "npm run build && electron .",
+    "desktop:check": "electron . --smoke-test",
+    "dist:win": "npm run build && electron --version && electron-builder --win --x64 --publish never"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -19,11 +22,67 @@
     "vite": "^7.0.0",
     "@vitejs/plugin-react": "^4.7.0",
     "tailwindcss": "^4.1.0",
-    "@tailwindcss/vite": "^4.1.0"
+    "@tailwindcss/vite": "^4.1.0",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3"
   },
   "description": "CarsonBench: a source-backed human vs DeepSeek reading experiment for Silent Spring",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
+  },
+  "main": "electron/main.js",
+  "author": "CarsonBench contributors",
+  "build": {
+    "appId": "org.carsonbench.desktop",
+    "productName": "CarsonBench",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "server/deepseek.js",
+      "src/protocol.js",
+      "src/data/experiment.json",
+      "build/icon.png",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "!**/*.test.js",
+      "!node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "CarsonBench-${version}-${arch}-${target}.${ext}",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": false,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "CarsonBench-${version}-${arch}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "CarsonBench-${version}-${arch}-portable.${ext}"
+    },
+    "electronDist": "node_modules/electron/dist"
   }
 }

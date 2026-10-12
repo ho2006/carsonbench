@@ -4,7 +4,34 @@
 
 桌面课堂展示与实际模型实验使用同一个页面。输入自己的 DeepSeek API Key、选择模型，点击「开始真实实验」，即可进入阅读、独立作答、模型调用、人工评分、比较结论的完整流程。
 
-![桌面实验界面](carsonbench-preview.jpg)
+![Electron 桌面应用](carsonbench-desktop-preview.png)
+
+## Windows 独立应用
+
+从 [GitHub Releases](https://github.com/ho2006/carsonbench/releases/latest) 下载：
+
+- `CarsonBench-1.1.0-x64-setup.exe`：Windows x64 安装版，支持选择安装目录与桌面快捷方式。
+- `CarsonBench-1.1.0-x64-portable.exe`：Windows x64 免安装版，直接打开即可。
+- `SHA256SUMS.txt`：二进制校验和。
+
+应用内置界面、原著阅读包和 API 调用模块，不需要安装 Node.js、启动本地服务器或浏览器。离线可以阅读材料、查看与评阅已有实验；新的模型调用需要网络和自己的 Key。安装版与免安装版共用 `%APPDATA%/CarsonBench` 中的设备记录，升级或卸载不会主动清除这些记录。
+
+桌面版支持原生「另存为」、实验 JSON 导入、缩放及全屏展示。导入或开始新实验前，已有回答会先导出备份；取消保存时保留当前实验。网页版记录可通过 JSON 导入桌面版，浏览器缓存不会自动迁移。
+
+此版本未使用代码签名证书，Windows 可能显示发布者未知或 SmartScreen 提示。只从本仓库 Releases 下载并核对 SHA256；不要求关闭系统安全保护。
+
+## 构建桌面版
+
+```sh
+npm install
+npm run desktop
+npm run desktop:check
+npm run dist:win
+```
+
+`desktop` 构建并打开应用；`desktop:check` 使用隐藏测试窗口检查隔离、内置资源、IPC、设备存储和原生导出；`dist:win` 在 Windows 上构建安装版与免安装版，结果位于 `release/`。首次运行会从 Electron 官方下载运行时。打包仅包含编译界面与必要主进程代码，排除 Node 依赖、密钥、原 EPUB 和本地实验文件。
+
+桌面代码使用 `contextIsolation`、渲染进程沙箱、严格资源策略及受限 IPC；没有向页面暴露通用 Node 或文件系统权限。外部资料通过系统浏览器打开。
 
 ## 本地运行
 
@@ -45,7 +72,7 @@ npm run dev
 - 连接验证调用 `/models`；生成与追问调用 `/chat/completions`，按账户实际用量计费。不自动重试。取消或超时不保证已发送的请求免于计费。
 - 参数固定为 `temperature: 0`、`max_tokens: 4096`、非流式、思考模式关闭；提示词 `CarsonBench-v3`。
 - 模型别名可能随供应商升级，服务端返回标识未必表示可复现的底层权重版本。每次调用保留完整原始响应，固定参数也不保证完全确定性。
-- 阅读材料、学生回答和实验档案保存在当前浏览器，不跨设备同步；使用 JSON 下载备份。本版本不提供 JSON 导入。
+- 阅读材料、学生回答和实验档案保存在当前浏览器或桌面应用的设备目录，不跨设备同步。支持 JSON 导入与导出；导入已有记录时会先备份当前回答。
 
 ## 部署到 Vercel
 
