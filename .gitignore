@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.local
+.source/
+*.epub
+.env
+.env.*
+!.env.example
+CarsonBench-*.json
